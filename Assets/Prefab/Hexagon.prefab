@@ -235,8 +235,6 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 256
   hexColorIndex: 0
-  isMove: 0
   outlineChild: {fileID: 1803253926624009750}
   neighbors: []
-  returnNewNeighbors: []
   selectedHex: []

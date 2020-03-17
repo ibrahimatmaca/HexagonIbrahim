@@ -35,7 +35,7 @@ public class Hex : MonoBehaviour
         ControlUpdateNeighbor();
         ControlNeighbor2();
     }
-
+    /*OverlapCircleAll kullanarak etrafıma bir çember çiz ve temas eden tüm collider ları bir diziye ata*/
     public void ControlUpdateNeighbor() // Sürekli etrafımdaki objeleri güncelliyor!
     {
         neighbors.Clear();

@@ -34,6 +34,7 @@ public class TouchPanel : MonoBehaviour, IPointerDownHandler,IPointerUpHandler,I
                     RaycastHit2D hit = Physics2D.Raycast(mousePos, Vector2.zero);
                     if (hit.collider != null)
                         HexGrid2.instance.SelectObject(hit.collider.gameObject, mousePos);
+
                 }
             }
             else

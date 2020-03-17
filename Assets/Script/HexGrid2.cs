@@ -29,10 +29,12 @@ public class HexGrid2 : MonoBehaviour
 
     [Header("Prefab & List")]
     public GameObject flatHexagon;
+    public GameObject bombHexagon;
     public List<GameObject> hexagonList = new List<GameObject>();
     public List<GameObject> selectedList = new List<GameObject>();
     public List<GameObject> hexDestroyList = new List<GameObject>();
 
+    private GameObject bombCreate;
     private List<GameObject> hexRowList = new List<GameObject>();
 
     [Header("Start Position")]
@@ -164,20 +166,17 @@ public class HexGrid2 : MonoBehaviour
                 }
             }
         }
-        if (selectFirst != null && selectSecond != null)
+        if (selectFirst != null || selectSecond != null && selectedList.Count < 3)
         {
             selectedList.Add(selectFirst);
             selectedList.Add(selectSecond);
-            //selectedParent.GetComponent<Hex>().isMove = true;
-            //selectFirst.GetComponent<Hex>().isMove = true;
-            //selectSecond.GetComponent<Hex>().isMove = true;
         }
 
         OutLineControl(true);
     }
-
+    /*Oluşturulan üçgenleri yok etmek için!*/
     public void DestroyListAndUpdateNeighbors()
-    { // Oluşturulan üçgenleri yok etmek için!
+    { 
         if (startGame  && hexDestroyList.Count > 0 && !isSwap)
         {
             while (true)
@@ -190,7 +189,7 @@ public class HexGrid2 : MonoBehaviour
             hexDestroyList.Clear();
         }
     }
-
+    /*Start da çağırılarak InvokeRepeating ile sürekli değişimde komşuları güncelliyor ve yok edilecek objeleri buluyor!*/
     private void CalculatorNewNeighbor()
     {
         if (!isSwap && startGame && !gameOver)
@@ -250,9 +249,19 @@ public class HexGrid2 : MonoBehaviour
             hexRowList.Clear();
 
 
-            hexagonList[hex_index] = Instantiate(flatHexagon, new Vector2(x, y + hexCount * yIteration), Quaternion.identity, transform);
-            SetColorHex(hexagonList[hex_index], 0);
-            hexagonList[hex_index].name = hex_index.ToString();
+            if(score % 100 == 0 && bombCreate == null)
+            {
+                hexagonList[hex_index] = Instantiate(bombHexagon, new Vector2(x, y + hexCount * yIteration), Quaternion.identity, transform);
+                SetColorHex(hexagonList[hex_index], 0);
+                hexagonList[hex_index].name = hex_index.ToString();
+                bombCreate = hexagonList[hex_index];
+            }
+            else
+            {
+                hexagonList[hex_index] = Instantiate(flatHexagon, new Vector2(x, y + hexCount * yIteration), Quaternion.identity, transform);
+                SetColorHex(hexagonList[hex_index], 0);
+                hexagonList[hex_index].name = hex_index.ToString();
+            }
 
             score += 5;
             scoreText.text = "Score: " + score.ToString();
@@ -283,10 +292,12 @@ public class HexGrid2 : MonoBehaviour
         }
         OutLineControl(false);
         selectedList.Clear();
-        if (hexDestroyList.Count > 0)
+        if (hexDestroyList.Count > 0 || !isSwap)
         {
             movesCount += 1;
             movesText.text = "Moves: " + movesCount.ToString();
+            if (bombCreate != null)
+                bombCreate.GetComponent<Bomb>().movesCount -= 1;
         }
         DestroyListAndUpdateNeighbors();
         
@@ -315,10 +326,12 @@ public class HexGrid2 : MonoBehaviour
         }
         OutLineControl(false);
         selectedList.Clear();
-        if (hexDestroyList.Count > 0)
+        if (hexDestroyList.Count > 0 || !isSwap)
         {
             movesCount += 1;
             movesText.text = "Moves: " + movesCount.ToString();
+            if (bombCreate != null)
+                bombCreate.GetComponent<Bomb>().movesCount-=1;
         }
 
         DestroyListAndUpdateNeighbors();
