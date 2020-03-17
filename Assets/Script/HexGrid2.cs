@@ -249,7 +249,7 @@ public class HexGrid2 : MonoBehaviour
             hexRowList.Clear();
 
 
-            if(score % 100 == 0 && bombCreate == null)
+            if(score == 100 && bombCreate == null)
             {
                 hexagonList[hex_index] = Instantiate(bombHexagon, new Vector2(x, y + hexCount * yIteration), Quaternion.identity, transform);
                 SetColorHex(hexagonList[hex_index], 0);
