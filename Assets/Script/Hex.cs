@@ -4,11 +4,10 @@ using UnityEngine;
 
 public class Hex : MonoBehaviour
 {
-    private float distanceNeighbor = 0.93f;
+    private float distanceNeighbor = 0.94f;
+    
     public LayerMask targetlayer;
     public int hexColorIndex = 0;
-
-    public bool isMove = false;
 
     [Header("Gameobject")]
     public GameObject outlineChild;
@@ -18,7 +17,7 @@ public class Hex : MonoBehaviour
 
     private void Update()
     {
-        if(!isMove && !HexGrid2.instance.startGame) // Yalnızca bir sefer çalıştırmış olacağız
+        if(!HexGrid2.instance.startGame) // Yalnızca bir sefer çalıştırmış olacağız
             ControlNeighbor2();
     }
 
@@ -32,12 +31,14 @@ public class Hex : MonoBehaviour
     {
         neighbors.Clear();//TÜm listeyi temizle
         //Listeye yeni elemanları ekle
-        
+
         ControlUpdateNeighbor();
+        ControlNeighbor2();
     }
 
-    private void ControlUpdateNeighbor() // Sürekli etrafımdaki objeleri güncelliyor!
+    public void ControlUpdateNeighbor() // Sürekli etrafımdaki objeleri güncelliyor!
     {
+        neighbors.Clear();
         Collider2D[] hit = Physics2D.OverlapCircleAll(transform.position, distanceNeighbor, targetlayer);
         for (int i = 0; i < hit.Length; i++)
         {
@@ -57,7 +58,6 @@ public class Hex : MonoBehaviour
             if (transform.name == neighbors[i].transform.name)
                 neighbors.RemoveAt(i);
         }
-        ControlNeighbor2();
     }
 
     /* 3-group control is done at the beginning!*/
@@ -67,7 +67,7 @@ public class Hex : MonoBehaviour
 
         foreach (GameObject first in neighbors)
         {
-            if (first.GetComponent<Hex>().hexColorIndex == hexColorIndex)
+            if (first.GetComponent<Hex>().hexColorIndex == hexColorIndex && first.transform.position.x != transform.position.x)
             {
                 selectedHex.Add(first);
             }
@@ -77,9 +77,12 @@ public class Hex : MonoBehaviour
         {
             foreach (GameObject second in selectedHex[1].GetComponent<Hex>().neighbors)
             { // 
-                if (second.GetComponent<Hex>().hexColorIndex == hexColorIndex && neighbors.Contains(second))
+                if (second != null)
                 {
-                    selectedHex.Add(second);
+                    if (second.GetComponent<Hex>().hexColorIndex == hexColorIndex && neighbors.Contains(second))
+                    {
+                        selectedHex.Add(second);
+                    }
                 }
             }
         }
@@ -90,16 +93,35 @@ public class Hex : MonoBehaviour
                 HexGrid2.instance.SetColorHex(transform.gameObject, hexColorIndex);
             else
             {
-                foreach (GameObject e in selectedHex)
-                    HexGrid2.instance.hexDestroyList.Add(e);
+                float distanceM = Vector2.Distance(transform.position, selectedHex[1].transform.position);
+                print("DistanceM " + distanceM);
+                float distanceSM = Vector2.Distance(selectedHex[2].transform.position, transform.position);
+                print("DistanceSM " + distanceSM);
+                float distanceFS = Vector2.Distance(selectedHex[1].transform.position, selectedHex[2].transform.position);
+                print("DistanceFS " + distanceFS);
 
-                HexGrid2.instance.isSwap = false;
+                if (0.93f > distanceSM && distanceM < 0.93f && distanceFS < 0.93f)
+                {
+                    print("Yazdır");
+                    foreach (GameObject e in selectedHex)
+                    {
+                        if(HexGrid2.instance.hexDestroyList.Contains(e) == false)
+                            HexGrid2.instance.hexDestroyList.Add(e);
+                    }
+                        
+
+                    HexGrid2.instance.isSwap = false;
+                }
             }
         }
         selectedHex.Clear();
     }
-
 }
+
+
+
+
+
 
 
 

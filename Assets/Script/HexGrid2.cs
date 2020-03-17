@@ -1,12 +1,14 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class HexGrid2 : MonoBehaviour
 {
     public static HexGrid2 instance;
 
+    private float xIteration;
     private float yIteration;
     private float fWidth;
     private float fHeight;
@@ -16,12 +18,14 @@ public class HexGrid2 : MonoBehaviour
     public int score;
     public int movesCount;
 
+    public bool gameOver = false;
     public bool isSwap = false;
     public bool startGame = false;
 
     [Header("UI")]
     public Text scoreText;
-    public Text movesText; 
+    public Text movesText;
+    public GameObject gameOverPanel;
 
     [Header("Prefab & List")]
     public GameObject flatHexagon;
@@ -48,6 +52,14 @@ public class HexGrid2 : MonoBehaviour
         /*UI başlangıç için görsellik açısından*/
         scoreText.text = "Score: " + score.ToString();
         movesText.text = "Moves: " + movesCount.ToString();
+
+        InvokeRepeating("CalculatorNewNeighbor", 2, 2);
+    }
+
+    private void Update()
+    {
+        if (gameOver)
+            gameOverPanel.SetActive(true);
     }
 
     /*It is a function that aligns according to the x and y values ​​of the object to be used. */
@@ -126,7 +138,7 @@ public class HexGrid2 : MonoBehaviour
         GameObject selectFirst = null;
         GameObject selectSecond = null;
 
-        Vector2 distance = new Vector2(neighbors[0].transform.position.x, neighbors[0].transform.position.y); // 
+        Vector2 distance = new Vector2(neighbors[0].transform.position.x, neighbors[0].transform.position.y);
         float distance2 = Vector2.Distance(distance, selectedPosition);
 
         foreach (GameObject e in neighbors)
@@ -156,35 +168,37 @@ public class HexGrid2 : MonoBehaviour
         {
             selectedList.Add(selectFirst);
             selectedList.Add(selectSecond);
-            selectedParent.GetComponent<Hex>().isMove = true;
-            selectFirst.GetComponent<Hex>().isMove = true;
-            selectSecond.GetComponent<Hex>().isMove = true;
+            //selectedParent.GetComponent<Hex>().isMove = true;
+            //selectFirst.GetComponent<Hex>().isMove = true;
+            //selectSecond.GetComponent<Hex>().isMove = true;
         }
 
         OutLineControl(true);
     }
 
     public void DestroyListAndUpdateNeighbors()
-    {
-        while (true)
+    { // Oluşturulan üçgenleri yok etmek için!
+        if (startGame  && hexDestroyList.Count > 0 && !isSwap)
         {
-            if (hexDestroyList.Count == 0)
-                break;
-            HexMapController(hexDestroyList[0], 0);
-            hexDestroyList.RemoveAt(0);
-            Debug.Log("Destroy");
+            while (true)
+            {
+                if (hexDestroyList.Count == 0)
+                    break;
+                HexMapController(hexDestroyList[0], 0);
+                hexDestroyList.RemoveAt(0);
+            }
+            hexDestroyList.Clear();
         }
-        movesCount += 1;
-        movesText.text = "Moves: " + movesCount.ToString();
-        CalculatorNeighborAgain();
     }
 
-    public void CalculatorNeighborAgain() //Tüm listeyi tekrardan kontrol ediyor
+    private void CalculatorNewNeighbor()
     {
-        for (int i = 0; i < hexagonList.Count; i++)
+        if (!isSwap && startGame && !gameOver)
         {
-            hexagonList[i].GetComponent<Hex>().RestartNeighbors();
+            foreach (GameObject my in hexagonList)
+                my.GetComponent<Hex>().RestartNeighbors();
         }
+        DestroyListAndUpdateNeighbors();
     }
 
     /*Open and close the outer circle*/
@@ -212,6 +226,7 @@ public class HexGrid2 : MonoBehaviour
     //Eğer patlarsa olacaklar ve 
     private void HexMapController(GameObject selected, int index)
     {
+        
         if (selected != null)
         {
             int hex_index = hexagonList.IndexOf(selected);
@@ -234,7 +249,8 @@ public class HexGrid2 : MonoBehaviour
             int hexCount = hexRowList.Count;
             hexRowList.Clear();
 
-            hexagonList[hex_index] = Instantiate(flatHexagon, new Vector2(x, y+hexCount* yIteration), Quaternion.identity, transform);
+
+            hexagonList[hex_index] = Instantiate(flatHexagon, new Vector2(x, y + hexCount * yIteration), Quaternion.identity, transform);
             SetColorHex(hexagonList[hex_index], 0);
             hexagonList[hex_index].name = hex_index.ToString();
 
@@ -267,7 +283,13 @@ public class HexGrid2 : MonoBehaviour
         }
         OutLineControl(false);
         selectedList.Clear();
+        if (hexDestroyList.Count > 0)
+        {
+            movesCount += 1;
+            movesText.text = "Moves: " + movesCount.ToString();
+        }
         DestroyListAndUpdateNeighbors();
+        
         isSwap = false;
     }
 
@@ -275,7 +297,6 @@ public class HexGrid2 : MonoBehaviour
     {
         isSwap = true;
         Vector2 startPos;
-        print("UnClockwise");
         for (int i = 0; i < selectedList.Count; i++)
         {
             if (isSwap)
@@ -294,13 +315,24 @@ public class HexGrid2 : MonoBehaviour
         }
         OutLineControl(false);
         selectedList.Clear();
-        DestroyListAndUpdateNeighbors();
+        if (hexDestroyList.Count > 0)
+        {
+            movesCount += 1;
+            movesText.text = "Moves: " + movesCount.ToString();
+        }
 
+        DestroyListAndUpdateNeighbors();
+        
         isSwap = false;
     }
 
     private void SelectedRestart(GameObject _selectedGameO)
     {
         _selectedGameO.GetComponent<Hex>().RestartNeighbors();
+    }
+
+    public void RestartScene()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 }

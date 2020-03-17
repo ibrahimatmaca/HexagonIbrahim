@@ -23,23 +23,26 @@ public class TouchPanel : MonoBehaviour, IPointerDownHandler,IPointerUpHandler,I
     {
         upHand = eventData.position;
 
-        if(downHand == upHand)
+        if(HexGrid2.instance.gameOver == false)
         {
-            if (!HexGrid2.instance.isSwap)
+            if (downHand == upHand)
             {
-                Vector2 mousePos = Camera.main.ScreenToWorldPoint(upHand);
+                if (!HexGrid2.instance.isSwap)
+                {
+                    Vector2 mousePos = Camera.main.ScreenToWorldPoint(upHand);
 
-                RaycastHit2D hit = Physics2D.Raycast(mousePos, Vector2.zero);
-                if (hit.collider != null)
-                    HexGrid2.instance.SelectObject(hit.collider.gameObject, mousePos);
+                    RaycastHit2D hit = Physics2D.Raycast(mousePos, Vector2.zero);
+                    if (hit.collider != null)
+                        HexGrid2.instance.SelectObject(hit.collider.gameObject, mousePos);
+                }
             }
-        }
-        else
-        {
-            if(upHand.x > downHand.x || upHand.y > downHand.y)
-                StartCoroutine(HexGrid2.instance.UnClockWise());
             else
-                StartCoroutine(HexGrid2.instance.ClockWise());
+            {
+                if (upHand.x > downHand.x || upHand.y > downHand.y)
+                    StartCoroutine(HexGrid2.instance.UnClockWise());
+                else
+                    StartCoroutine(HexGrid2.instance.ClockWise());
+            }
         }
     }
 }
