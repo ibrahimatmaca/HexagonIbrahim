@@ -12,7 +12,6 @@ public class Hex : MonoBehaviour
     [Header("Gameobject")]
     public GameObject outlineChild;
     public List<GameObject> neighbors = new List<GameObject>();
-    //public List<GameObject> sameColorHex = new List<GameObject>();
     public List<GameObject> selectedHex = new List<GameObject>();
 
     private void Update()

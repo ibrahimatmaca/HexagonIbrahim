@@ -13,11 +13,12 @@ public class HexGrid2 : MonoBehaviour
     private float fWidth;
     private float fHeight;
 
-    public int gridSizeX;
-    public int gridSizeY;
+    private int gridSizeX = 8;
+    private int gridSizeY = 9;
     public int score;
     public int movesCount;
 
+    public bool gamePlay = false;
     public bool gameOver = false;
     public bool isSwap = false;
     public bool startGame = false;
@@ -27,9 +28,14 @@ public class HexGrid2 : MonoBehaviour
     public Text movesText;
     public GameObject gameOverPanel;
 
+    public Text columnText;
+    public Text lineText;
+
+
     [Header("Prefab & List")]
     public GameObject flatHexagon;
     public GameObject bombHexagon;
+    public GameObject startScenePanel;
     public List<GameObject> hexagonList = new List<GameObject>();
     public List<GameObject> selectedList = new List<GameObject>();
     public List<GameObject> hexDestroyList = new List<GameObject>();
@@ -46,22 +52,17 @@ public class HexGrid2 : MonoBehaviour
     void Awake()
     {
         instance = this;
-        CreateFlatHexGridStart();
-    }
-
-    void Start()
-    {
-        /*UI başlangıç için görsellik açısından*/
-        scoreText.text = "Score: " + score.ToString();
-        movesText.text = "Moves: " + movesCount.ToString();
-
-        InvokeRepeating("CalculatorNewNeighbor", 2, 2);
+        columnText.text = gridSizeX.ToString();
+        lineText.text = gridSizeY.ToString();
     }
 
     private void Update()
     {
-        if (gameOver)
-            gameOverPanel.SetActive(true);
+        if (gamePlay)
+        {
+            if (gameOver)
+                gameOverPanel.SetActive(true);
+        }
     }
 
     /*It is a function that aligns according to the x and y values ​​of the object to be used. */
@@ -348,4 +349,68 @@ public class HexGrid2 : MonoBehaviour
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
+
+    public void StartSceneLoad()
+    {
+        if (gridSizeX == 9)
+        {
+            Camera.main.transform.position = new Vector3(0.5f, 0, -10);
+            Camera.main.orthographicSize = 7.5f;
+        }
+        else if(gridSizeX > 9)
+        {
+            Camera.main.transform.position = new Vector3(1.2f, 1.5f, -10);
+            Camera.main.orthographicSize = 9f;
+        }
+        if(gridSizeY > 10)
+        {
+            Camera.main.transform.position = new Vector3(0, 1.41f, -10);
+            
+        }
+
+        gamePlay = true;
+        startScenePanel.SetActive(false);
+        /*UI başlangıç için görsellik açısından*/
+        scoreText.text = "Score: " + score.ToString();
+        movesText.text = "Moves: " + movesCount.ToString();
+
+        InvokeRepeating("CalculatorNewNeighbor", 2, 2);
+        CreateFlatHexGridStart();
+    }
+
+
+    public void ColumnSelected(int _index)
+    {
+        if(_index > 0 && gridSizeX < 11)
+        {
+            //arttır
+            gridSizeX++;
+            columnText.text = gridSizeX.ToString();
+        }
+        else if(_index < 0 && gridSizeX > 4)
+        {
+            // azalt
+            gridSizeX--;
+            columnText.text = gridSizeX.ToString();
+        }
+    }
+
+    public void LineSelected(int _index)
+    {
+        if (_index > 0 && gridSizeY < 12)
+        {
+            //arttır
+            gridSizeY++;
+            lineText.text = gridSizeY.ToString();
+        }
+        else if (_index < 0 && gridSizeY > 5)
+        {
+            // azalt
+            gridSizeY--;
+            lineText.text = gridSizeY.ToString();
+        }
+    }
+
+
+
 }
